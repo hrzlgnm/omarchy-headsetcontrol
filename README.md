@@ -25,8 +25,31 @@ The icon appears at the right end of the bar. Move it with
 `omarchy bar move hrzlgnm.headsetcontrol --before omarchy.clock`, or any
 other placement.
 
-To update later: `omarchy plugin update`. To remove:
-`omarchy plugin remove hrzlgnm.headsetcontrol`.
+## Update
+
+```bash
+omarchy plugin update
+```
+
+Updates every installed git-managed plugin, including this one. To update
+just this plugin, pass its id:
+
+```bash
+omarchy plugin update hrzlgnm.headsetcontrol
+```
+
+Sidetone and EQ levels are saved in the widget's settings and survive an
+update; the bar widget itself hot-reloads after the new files land.
+
+## Uninstall
+
+```bash
+omarchy plugin remove hrzlgnm.headsetcontrol
+```
+
+Removes the plugin and its bar widget. Settings left behind in
+`~/.config/omarchy/shell.json` are harmless but can be deleted by hand if
+you want a clean slate.
 
 ## Requirements
 
@@ -37,7 +60,7 @@ To update later: `omarchy plugin update`. To remove:
 
 ## Using it
 
-![Headset panel](screenshot.png)
+![Headset panel](preview.png)
 
 The bar icon is dim when no headset is detected and bright when one is.
 With a battery, it shows the percentage next to the headset glyph.
