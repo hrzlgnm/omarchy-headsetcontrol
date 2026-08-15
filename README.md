@@ -10,6 +10,8 @@ which the widget shells out to in JSON mode. Sections appear only when the
 connected headset actually reports the capability: no sidetone support, no
 sidetone slider; no battery chip, no percentage.
 
+![Headset panel](preview.png)
+
 ## Install
 
 ```bash
@@ -59,8 +61,6 @@ you want a clean slate.
 - A supported headset, connected over USB or Bluetooth.
 
 ## Using it
-
-![Headset panel](preview.png)
 
 The bar icon is dim when no headset is detected and bright when one is.
 With a battery, it shows the percentage next to the headset glyph.
