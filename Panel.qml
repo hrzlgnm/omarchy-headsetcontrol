@@ -110,6 +110,7 @@ Panel {
     var state = Model.parseState(text)
     if (!state) {
       console.warn("HeadsetControl: unparseable output")
+      applyState({ connected: false })
       return
     }
     if (state.error) {

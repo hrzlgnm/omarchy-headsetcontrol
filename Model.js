@@ -41,16 +41,27 @@ function parseState(data) {
 
   var battery = dev.battery || {}
   var level = typeof battery.level === "number" && battery.level >= 0 ? battery.level : -1
+  var status = typeof battery.status === "string" ? battery.status : "BATTERY_UNAVAILABLE"
   var chatmix = typeof dev.chatmix === "number" ? dev.chatmix : -1
 
   return {
-    connected: true,
+    connected: isConnected(caps, status),
     deviceName: dev.device || "",
     batteryLevel: level,
-    batteryStatus: typeof battery.status === "string" ? battery.status : "BATTERY_UNAVAILABLE",
+    batteryStatus: status,
     chatmixLevel: chatmix,
     capabilities: caps
   }
+}
+
+// A supported device's dongle/base station is always reported as "success"
+// even when the headset itself is off. The only reliable live signal is the
+// battery: mirror `headsetcontrol --connected`, which only counts a battery
+// that is actually reporting as connected. Headsets without a battery chip
+// count as connected whenever they are detected at all.
+function isConnected(caps, batteryStatus) {
+  if (!hasCapability(caps, "CAP_BATTERY_STATUS")) return true
+  return batteryStatus === "BATTERY_AVAILABLE" || batteryStatus === "BATTERY_CHARGING"
 }
 
 function hasCapability(caps, name) {
@@ -87,6 +98,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     clampIndex: clampIndex,
     parseState: parseState,
+    isConnected: isConnected,
     hasCapability: hasCapability,
     batteryIcon: batteryIcon,
     batteryLabel: batteryLabel,
