@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 hrzlgnm
+// SPDX-License-Identifier: MIT
+
 import QtQuick
 import Quickshell
 import Quickshell.Io

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 hrzlgnm
+// SPDX-License-Identifier: MIT
+
 // Helpers for the HeadsetControl bar widget. Kept in JS so the pure
 // parsing/formatting logic stays testable and out of QML bindings.
 
