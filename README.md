@@ -37,6 +37,8 @@ To update later: `omarchy plugin update`. To remove:
 
 ## Using it
 
+![Headset panel](screenshot.png)
+
 The bar icon is dim when no headset is detected and bright when one is.
 With a battery, it shows the percentage next to the headset glyph.
 
