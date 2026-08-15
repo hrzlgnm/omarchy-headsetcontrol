@@ -59,9 +59,9 @@ function hasCapability(caps, name) {
 
 function batteryIcon(level, status) {
   if (typeof level !== "number" || level < 0) return ""
-  if (status === "BATTERY_FULL" || level >= 100) return "󰂅"
+  var charging = status === "BATTERY_CHARGING"
   var index = clampIndex(Math.floor(level / 10))
-  return status === "BATTERY_CHARGING" ? chargingIcons[index] : defaultIcons[index]
+  return charging ? chargingIcons[index] : defaultIcons[index]
 }
 
 function batteryLabel(level, status) {
@@ -74,7 +74,6 @@ function batteryStatusLabel(status) {
   switch (status) {
     case "BATTERY_CHARGING": return "charging"
     case "BATTERY_DISCHARGING": return "discharging"
-    case "BATTERY_FULL": return "full"
     default: return ""
   }
 }

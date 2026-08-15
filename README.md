@@ -73,7 +73,7 @@ With a battery, it shows the percentage next to the headset glyph.
 Inside the panel:
 
 - **Header** — headset name and connection state, plus a battery row with
-  level and status (charging / discharging / full).
+  level and status (charging / discharging).
 - **Sidetone** — slider from 0 to 128. Right-click it to mute (0).
 - **Lights** — turn the headset LEDs on or off.
 - **Auto-off timer** — minutes of inactivity before the headset powers itself
