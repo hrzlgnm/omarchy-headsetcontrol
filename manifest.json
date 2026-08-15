@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "hrzlgnm.headsetcontrol",
+  "name": "HeadsetControl",
+  "version": "1.0.0",
+  "author": "hrzlgnm",
+  "license": "MIT",
+  "description": "Control SteelSeries-compatible headsets from the bar: battery, sidetone, EQ presets, auto-off, chatmix and more.",
+  "repository": "https://github.com/hrzlgnm/noctalia-headsetcontrol",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "HeadsetControl",
+    "description": "Headset battery, sidetone, equalizer, auto-off timer, mic LED and chatmix via HeadsetControl. Click to open the panel, right-click to refresh.",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "pollingInterval": 30,
+      "barShowPercentage": true,
+      "lastSidetone": 64,
+      "lastEqPreset": 0
+    },
+    "schema": [
+      {
+        "key": "pollingInterval",
+        "type": "integer",
+        "label": "Polling interval (seconds)",
+        "defaultValue": 30,
+        "min": 5,
+        "max": 600,
+        "step": 5,
+        "description": "How often to re-check the headset. 0 disables background polling; the panel still refreshes when opened."
+      },
+      {
+        "key": "barShowPercentage",
+        "type": "bool",
+        "label": "Show battery percentage in the bar",
+        "defaultValue": true
+      },
+      {
+        "key": "lastSidetone",
+        "type": "integer",
+        "label": "Default sidetone level",
+        "defaultValue": 64,
+        "min": 0,
+        "max": 128,
+        "step": 1
+      },
+      {
+        "key": "lastEqPreset",
+        "type": "integer",
+        "label": "Default EQ preset",
+        "defaultValue": 0,
+        "min": 0,
+        "max": 3,
+        "step": 1
+      }
+    ]
+  }
+}
