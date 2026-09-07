@@ -41,6 +41,7 @@ Panel {
   property int batteryLevel: -1
   property string batteryStatus: "BATTERY_UNAVAILABLE"
   property int chatmixLevel: -1
+  property int eqPresetCount: 4
   property var capabilities: ({})
 
   readonly property bool isCharging: batteryStatus === "BATTERY_CHARGING"
@@ -135,6 +136,7 @@ Panel {
     root.batteryLevel = state.batteryLevel
     root.batteryStatus = state.batteryStatus
     root.chatmixLevel = state.chatmixLevel
+    root.eqPresetCount = state.eqPresetCount || 4
     root.capabilities = state.capabilities
   }
 
@@ -411,17 +413,21 @@ Panel {
           text: "Equalizer preset"
           visible: root.isConnected && root.cEqPreset
         }
-        Row {
-          id: eqRow
+        // Driven by the count HeadsetControl reports rather than a fixed four:
+        // an Audeze Maxwell 2 has ten, so six of them used to be unreachable.
+        Grid {
+          id: eqGrid
           visible: root.isConnected && root.cEqPreset
           width: parent.width
+          columns: Model.eqPresetColumns(root.deviceName)
           spacing: Style.space(8)
           Repeater {
-            model: 4
+            model: Model.eqPresetLabels(root.deviceName, root.eqPresetCount)
             Button {
               required property int index
-              width: (eqRow.width - eqRow.spacing * 3) / 4
-              text: String(index)
+              required property var modelData
+              width: (eqGrid.width - eqGrid.spacing * (eqGrid.columns - 1)) / eqGrid.columns
+              text: modelData
               selected: root.lastEqPreset === index
               onClicked: root.setEqPreset(index)
             }

@@ -7,6 +7,27 @@
 const chargingIcons = ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"]
 const defaultIcons = ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰁂", "󰁂", "󰁹"]
 
+// Shown when the device is one whose preset bank has published names.
+// HeadsetControl's JSON reports only a count, but its own driver documents what
+// each slot holds, so numbering them hides information the user already has:
+// "Footsteps" says considerably more than "5".
+//
+// Keyed on the `device` string HeadsetControl reports. Both Audeze drivers
+// carry the same list (audeze_maxwell.hpp and audeze_maxwell2.hpp: "1 = Audeze,
+// 2 = Treble Boost, 3 = Bass Boost, 4 = Immersive, 5 = Competition,
+// 6 = Footsteps, 7 = EQ1, 8 = EQ2, 9 = EQ3, 10 = EQ4"), shifted here to the
+// 0-based indices the -p flag takes.
+const eqPresetNames = {
+  "Audeze Maxwell": ["Audeze", "Treble Boost", "Bass Boost", "Immersive",
+                     "Competition", "Footsteps", "EQ1", "EQ2", "EQ3", "EQ4"],
+  "Audeze Maxwell 2": ["Audeze", "Treble Boost", "Bass Boost", "Immersive",
+                       "Competition", "Footsteps", "EQ1", "EQ2", "EQ3", "EQ4"]
+}
+
+// Fallback when the count is missing, matching what the panel showed before it
+// used the reported value.
+const defaultEqPresetCount = 4
+
 function clampIndex(index) {
   return Math.max(0, Math.min(9, index))
 }
@@ -44,6 +65,9 @@ function parseState(data) {
   var level = typeof battery.level === "number" && battery.level >= 0 ? battery.level : -1
   var status = typeof battery.status === "string" ? battery.status : "BATTERY_UNAVAILABLE"
   var chatmix = typeof dev.chatmix === "number" ? dev.chatmix : -1
+  var presets = typeof dev.equalizer_presets_count === "number"
+    && dev.equalizer_presets_count > 0
+      ? dev.equalizer_presets_count : defaultEqPresetCount
 
   return {
     detected: true,
@@ -52,8 +76,26 @@ function parseState(data) {
     batteryLevel: level,
     batteryStatus: status,
     chatmixLevel: chatmix,
+    eqPresetCount: presets,
     capabilities: caps
   }
+}
+
+// Labels for the preset buttons: real names where the device has them,
+// otherwise the index, which is what `-p` takes either way.
+function eqPresetLabels(deviceName, count) {
+  var n = typeof count === "number" && count > 0 ? count : defaultEqPresetCount
+  var names = eqPresetNames[deviceName]
+  var out = []
+  for (var i = 0; i < n; i++) {
+    out.push(names && names[i] ? names[i] : String(i))
+  }
+  return out
+}
+
+// Long names need fewer, wider buttons; bare indices still fit four across.
+function eqPresetColumns(deviceName) {
+  return eqPresetNames[deviceName] ? 2 : 4
 }
 
 // A supported device's dongle/base station is always reported as "success"
@@ -116,6 +158,8 @@ if (typeof module !== "undefined") {
     batteryIcon: batteryIcon,
     batteryLabel: batteryLabel,
     batteryStatusLabel: batteryStatusLabel,
-    chatmixLabel: chatmixLabel
+    chatmixLabel: chatmixLabel,
+    eqPresetLabels: eqPresetLabels,
+    eqPresetColumns: eqPresetColumns
   }
 }
