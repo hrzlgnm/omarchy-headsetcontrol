@@ -13,7 +13,8 @@ function clampIndex(index) {
 
 // Parse `headsetcontrol -o json` output into a plain state object.
 // Returns null on unparseable output, otherwise a state object:
-//   connected       bool
+//   detected        bool (headsetcontrol found the device at all)
+//   connected       bool (battery is reporting, so the headset is live)
 //   deviceName      string
 //   batteryLevel    int (-1 when unavailable)
 //   batteryStatus   string (BATTERY_*)
@@ -27,10 +28,10 @@ function parseState(data) {
     return null
   }
   if (!json || !Array.isArray(json.devices) || json.devices.length === 0) {
-    return { connected: false }
+    return { detected: false, connected: false }
   }
   var dev = json.devices[0] || {}
-  if (dev.status !== "success") return { connected: false }
+  if (dev.status !== "success") return { detected: false, connected: false }
 
   var caps = {}
   if (Array.isArray(dev.capabilities)) {
@@ -45,6 +46,7 @@ function parseState(data) {
   var chatmix = typeof dev.chatmix === "number" ? dev.chatmix : -1
 
   return {
+    detected: true,
     connected: isConnected(caps, status),
     deviceName: dev.device || "",
     batteryLevel: level,
@@ -59,6 +61,17 @@ function parseState(data) {
 // battery: mirror `headsetcontrol --connected`, which only counts a battery
 // that is actually reporting as connected. Headsets without a battery chip
 // count as connected whenever they are detected at all.
+//
+// A battery that is not reporting does not by itself mean the headset is off.
+// A dongle can also end up in a state where it enumerates, plays audio and
+// still applies setting writes, while answering every status query with an
+// empty frame until it is physically replugged. Observed on an Audeze Maxwell 2
+// (3329:4b29): audio streaming at 48kHz/24-bit, sidetone changes audible, and
+// `BATTERY_UNAVAILABLE` throughout. See Sapd/HeadsetControl#573.
+//
+// The two are indistinguishable from this output, which is why `detected` is
+// reported separately: the panel can say the device was found without claiming
+// to know whether the headset is off or the dongle needs a replug.
 function isConnected(caps, batteryStatus) {
   if (!hasCapability(caps, "CAP_BATTERY_STATUS")) return true
   return batteryStatus === "BATTERY_AVAILABLE" || batteryStatus === "BATTERY_CHARGING"

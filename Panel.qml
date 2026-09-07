@@ -35,6 +35,7 @@ Panel {
   property int lastEqPreset: parseInt(setting("lastEqPreset", 0)) || 0
 
   // ---- live device state (from `headsetcontrol -o json`) ----
+  property bool isDetected: false
   property bool isConnected: false
   property string deviceName: ""
   property int batteryLevel: -1
@@ -44,6 +45,10 @@ Panel {
 
   readonly property bool isCharging: batteryStatus === "BATTERY_CHARGING"
   readonly property bool batteryReady: isConnected && batteryLevel >= 0
+
+  // Found, but its battery is not reporting. Either the headset is off or the
+  // dongle wants a replug, and nothing in the output tells the two apart.
+  readonly property bool isSilent: isDetected && !isConnected
 
   // Capability flags gate every section of the panel.
   readonly property bool cSidetone: Model.hasCapability(capabilities, "CAP_SIDETONE")
@@ -67,6 +72,9 @@ Panel {
   }
 
   function barTooltip() {
+    if (isSilent)
+      return (deviceName !== "" ? deviceName : "Headset")
+        + " · not reporting\nTurn the headset on, or replug the dongle"
     if (!isConnected) return "No headset detected"
     var parts = [deviceName]
     if (batteryReady) parts.push(batteryLevel + "%" + (isCharging ? " \u00b7 charging" : ""))
@@ -121,6 +129,7 @@ Panel {
   }
 
   function applyState(state) {
+    root.isDetected = state.detected === true
     root.isConnected = state.connected
     root.deviceName = state.deviceName || ""
     root.batteryLevel = state.batteryLevel
@@ -260,18 +269,32 @@ Panel {
             Text {
               text: root.isConnected
                 ? "Connected"
-                : "No headset detected"
+                : (root.isSilent ? "Not reporting" : "No headset detected")
               color: root.isConnected ? Color.accent : Qt.darker(root.barForeground, 1.4)
               font.pixelSize: Style.font.bodySmall
             }
 
+            // The name is known as soon as the device is detected, so show it
+            // even while the battery is silent - it is the clearest signal that
+            // headsetcontrol did find the hardware.
             Text {
-              visible: root.isConnected && root.deviceName !== ""
+              visible: root.isDetected && root.deviceName !== ""
               text: root.deviceName
               color: Qt.darker(root.barForeground, 1.4)
               font.pixelSize: Style.font.bodySmall
             }
           }
+        }
+
+        // Says what is actually known and what to try, rather than leaving a
+        // detected device looking like an absent one.
+        Text {
+          visible: root.isSilent
+          width: parent.width
+          text: "Battery is not reporting. Turn the headset on; if it is already on, unplug the dongle and plug it back in."
+          color: Qt.darker(root.barForeground, 1.4)
+          wrapMode: Text.WordWrap
+          font.pixelSize: Style.font.caption
         }
 
         Row {
