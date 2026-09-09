@@ -29,7 +29,7 @@ const eqPresetNames = {
 const defaultEqPresetCount = 4
 
 function disconnectedState() {
-  return { detected: false, connected: false, deviceName: "", batteryLevel: -1, batteryStatus: "BATTERY_UNAVAILABLE", chatmixLevel: -1, capabilities: {} }
+  return { detected: false, connected: false, deviceName: "", batteryLevel: -1, batteryStatus: "BATTERY_UNAVAILABLE", chatmixLevel: -1, capabilities: {}, eqPresetCount: 0 }
 }
 
 function clampIndex(index) {
@@ -53,10 +53,10 @@ function parseState(data) {
     return null
   }
   if (!json || !Array.isArray(json.devices) || json.devices.length === 0) {
-    return { detected: false, connected: false }
+    return disconnectedState()
   }
   var dev = json.devices[0] || {}
-  if (dev.status !== "success") return { detected: false, connected: false }
+  if (dev.status !== "success") return disconnectedState()
 
   var caps = {}
   if (Array.isArray(dev.capabilities)) {

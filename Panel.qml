@@ -131,13 +131,13 @@ Panel {
 
   function applyState(state) {
     root.isDetected = state.detected === true
-    root.isConnected = state.connected
+    root.isConnected = !!state.connected
     root.deviceName = state.deviceName || ""
-    root.batteryLevel = state.batteryLevel
-    root.batteryStatus = state.batteryStatus
-    root.chatmixLevel = state.chatmixLevel
+    root.batteryLevel = state.batteryLevel !== undefined ? state.batteryLevel : -1
+    root.batteryStatus = state.batteryStatus || "BATTERY_UNAVAILABLE"
+    root.chatmixLevel = state.chatmixLevel !== undefined ? state.chatmixLevel : -1
     root.eqPresetCount = state.eqPresetCount || 4
-    root.capabilities = state.capabilities
+    root.capabilities = state.capabilities || ({})
   }
 
   // ---- settings persistence ----
