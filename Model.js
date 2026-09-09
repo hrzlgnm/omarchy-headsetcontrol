@@ -7,6 +7,10 @@
 const chargingIcons = ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"]
 const defaultIcons = ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰁂", "󰁂", "󰁹"]
 
+function disconnectedState() {
+  return { connected: false, deviceName: "", batteryLevel: -1, batteryStatus: "BATTERY_UNAVAILABLE", chatmixLevel: -1, capabilities: {} }
+}
+
 function clampIndex(index) {
   return Math.max(0, Math.min(9, index))
 }
@@ -27,10 +31,10 @@ function parseState(data) {
     return null
   }
   if (!json || !Array.isArray(json.devices) || json.devices.length === 0) {
-    return { connected: false }
+    return disconnectedState()
   }
   var dev = json.devices[0] || {}
-  if (dev.status !== "success") return { connected: false }
+  if (dev.status !== "success") return disconnectedState()
 
   var caps = {}
   if (Array.isArray(dev.capabilities)) {
@@ -98,6 +102,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     clampIndex: clampIndex,
     parseState: parseState,
+    disconnectedState: disconnectedState,
     isConnected: isConnected,
     hasCapability: hasCapability,
     batteryIcon: batteryIcon,

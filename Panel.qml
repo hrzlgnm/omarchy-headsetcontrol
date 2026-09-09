@@ -110,7 +110,7 @@ Panel {
     var state = Model.parseState(text)
     if (!state) {
       console.warn("HeadsetControl: unparseable output")
-      applyState({ connected: false })
+      applyState(Model.disconnectedState())
       return
     }
     if (state.error) {
@@ -121,12 +121,12 @@ Panel {
   }
 
   function applyState(state) {
-    root.isConnected = state.connected
+    root.isConnected = !!state.connected
     root.deviceName = state.deviceName || ""
-    root.batteryLevel = state.batteryLevel
-    root.batteryStatus = state.batteryStatus
-    root.chatmixLevel = state.chatmixLevel
-    root.capabilities = state.capabilities
+    root.batteryLevel = state.batteryLevel !== undefined ? state.batteryLevel : -1
+    root.batteryStatus = state.batteryStatus || "BATTERY_UNAVAILABLE"
+    root.chatmixLevel = state.chatmixLevel !== undefined ? state.chatmixLevel : -1
+    root.capabilities = state.capabilities || ({})
   }
 
   // ---- settings persistence ----
