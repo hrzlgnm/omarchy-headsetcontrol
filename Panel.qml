@@ -25,8 +25,8 @@ Panel {
 
   // The bar host sizes each widget slot from the widget root's implicit size
   // (see Bar.qml), so expose the button's here or the slot collapses to zero.
-  implicitWidth: button.implicitWidth
-  implicitHeight: button.implicitHeight
+  implicitWidth: barRow.implicitWidth
+  implicitHeight: barRow.implicitHeight
 
   // ---- settings (inline shell.json layout entry, see BarWidget.setting) ----
   readonly property int pollingInterval: Math.max(0, parseInt(setting("pollingInterval", 30)) || 0)
@@ -68,8 +68,12 @@ Panel {
   readonly property string headsetGlyph: "󰋋"
 
   function barText() {
-    if (!isConnected || !showPercentage || !batteryReady) return root.headsetGlyph
-    return root.headsetGlyph + " " + batteryLevel + "%"
+    return root.headsetGlyph
+  }
+
+  function barLabel() {
+    if (!isConnected || !showPercentage || !batteryReady || button.vertical) return ""
+    return batteryLevel + "%"
   }
 
   function barTooltip() {
@@ -82,10 +86,9 @@ Panel {
     return parts.join(" \u00b7 ")
   }
 
-  // The percentage makes the button paint a text block wider than an icon, so
-  // the open-panel mark takes the painted width instead of the icon-sized
-  // fraction of the slot the fallback assumes.
-  readonly property real openPanelIndicatorWidth: showPercentage && batteryReady && !button.vertical ? button.glyphPaintedWidth : 0
+  // The percentage lives in its own button, so the icon button is always
+  // icon-sized and the open-panel mark can use the default width.
+  readonly property real openPanelIndicatorWidth: 0
 
   // ---- process plumbing ----
   // One process does everything: with `-o json` the JSON state is printed for
@@ -203,17 +206,37 @@ Panel {
   Component.onCompleted: Qt.callLater(root.checkConnected)
 
   // ---- bar button ----
-  BarIconButton {
-    id: button
+  // Icon first, percentage to its right (BarIconButton's own label would sit
+  // on the left, so the percentage is a separate button beside it).
+  Row {
+    id: barRow
     anchors.fill: parent
-    bar: root.bar
-    text: root.barText()
-    dimmed: !root.isConnected
-    slotSize: Style.bar.iconSlot * (root.showPercentage && root.batteryReady && !vertical ? 2 : 1)
-    tooltipText: root.barTooltip()
-    onPressed: function(b) {
-      if (b === Qt.RightButton) root.checkConnected()
-      else root.toggle()
+    spacing: 0
+
+    BarIconButton {
+      id: button
+      bar: root.bar
+      text: root.barText()
+      dimmed: !root.isConnected
+      tooltipText: root.barTooltip()
+      onPressed: function(b) {
+        if (b === Qt.RightButton) root.checkConnected()
+        else root.toggle()
+      }
+    }
+
+    WidgetButton {
+      id: percentButton
+      bar: root.bar
+      visible: root.barLabel() !== ""
+      text: root.barLabel()
+      dimmed: !root.isConnected
+      tooltipText: root.barTooltip()
+      horizontalMargin: 2
+      onPressed: function(b) {
+        if (b === Qt.RightButton) root.checkConnected()
+        else root.toggle()
+      }
     }
   }
 
