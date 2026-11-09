@@ -215,6 +215,12 @@ Panel {
 
     BarIconButton {
       id: button
+      width: implicitWidth
+      height: implicitHeight
+      anchors.verticalCenter: parent.verticalCenter
+      // Slightly narrower than the stock 27px slot so the icon sits closer
+      // to the percentage; the pair should read as one widget.
+      slotSize: 24
       bar: root.bar
       text: root.barText()
       dimmed: !root.isConnected
@@ -227,12 +233,27 @@ Panel {
 
     WidgetButton {
       id: percentButton
+      width: implicitWidth
+      height: implicitHeight
+      anchors.verticalCenter: parent.verticalCenter
       bar: root.bar
       visible: root.barLabel() !== ""
       text: root.barLabel()
       dimmed: !root.isConnected
       tooltipText: root.barTooltip()
-      horizontalMargin: 2
+      // No extra side padding: the icon button's own slot padding already
+      // separates the text from the glyph.
+      horizontalMargin: 0
+      // A 12px label paints 9 rows tall and cannot straddle the 26px bar
+      // middle (icons sit 7-18): it lands 7-15 or 8-16, always high. One step
+      // down renders 8 rows; with a 1px nudge they fill 9-16 with even gaps,
+      // matching the icons. Integer only: fractional shifts snap
+      // NativeRendering glyphs unevenly.
+      fontSize: Style.font.body - 1
+      // WidgetButton's figure-centering still leaves the text ~1px high, so
+      // nudge the paint down. Transform only: slot and hit area unchanged.
+      // Relative to font size so it tracks theme font/DPI scaling.
+      transform: Translate { y: Math.max(1, Math.round(percentButton.fontSize / 12)) }
       onPressed: function(b) {
         if (b === Qt.RightButton) root.checkConnected()
         else root.toggle()
